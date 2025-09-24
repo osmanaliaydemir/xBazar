@@ -1,0 +1,131 @@
+-- =============================================
+-- Create Tables
+-- =============================================
+
+-- Users Table
+CREATE TABLE [dbo].[Users] (
+    [Id] UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWID(),
+    [Email] NVARCHAR(256) NOT NULL UNIQUE,
+    [UserName] NVARCHAR(256) NOT NULL UNIQUE,
+    [FirstName] NVARCHAR(100) NOT NULL,
+    [LastName] NVARCHAR(100) NOT NULL,
+    [PhoneNumber] NVARCHAR(20) NULL,
+    [EmailConfirmed] BIT NOT NULL DEFAULT 0,
+    [PhoneNumberConfirmed] BIT NOT NULL DEFAULT 0,
+    [TwoFactorEnabled] BIT NOT NULL DEFAULT 0,
+    [LockoutEnabled] BIT NOT NULL DEFAULT 1,
+    [AccessFailedCount] INT NOT NULL DEFAULT 0,
+    [LockoutEnd] DATETIMEOFFSET NULL,
+    [PasswordHash] NVARCHAR(MAX) NULL,
+    [SecurityStamp] NVARCHAR(MAX) NULL,
+    [ConcurrencyStamp] NVARCHAR(MAX) NULL,
+    [IsActive] BIT NOT NULL DEFAULT 1,
+    [IsDeleted] BIT NOT NULL DEFAULT 0,
+    [CreatedAt] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    [UpdatedAt] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    [CreatedBy] UNIQUEIDENTIFIER NULL,
+    [UpdatedBy] UNIQUEIDENTIFIER NULL
+);
+
+-- Roles Table
+CREATE TABLE [dbo].[Roles] (
+    [Id] UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWID(),
+    [Name] NVARCHAR(256) NOT NULL UNIQUE,
+    [NormalizedName] NVARCHAR(256) NOT NULL UNIQUE,
+    [ConcurrencyStamp] NVARCHAR(MAX) NULL,
+    [Description] NVARCHAR(500) NULL,
+    [IsActive] BIT NOT NULL DEFAULT 1,
+    [IsDeleted] BIT NOT NULL DEFAULT 0,
+    [CreatedAt] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    [UpdatedAt] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    [CreatedBy] UNIQUEIDENTIFIER NULL,
+    [UpdatedBy] UNIQUEIDENTIFIER NULL
+);
+
+-- UserRoles Table (Many-to-Many)
+CREATE TABLE [dbo].[UserRoles] (
+    [UserId] UNIQUEIDENTIFIER NOT NULL,
+    [RoleId] UNIQUEIDENTIFIER NOT NULL,
+    [CreatedAt] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    [CreatedBy] UNIQUEIDENTIFIER NULL,
+    PRIMARY KEY ([UserId], [RoleId])
+);
+
+-- Addresses Table
+CREATE TABLE [dbo].[Addresses] (
+    [Id] UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWID(),
+    [UserId] UNIQUEIDENTIFIER NOT NULL,
+    [Title] NVARCHAR(100) NOT NULL,
+    [FirstName] NVARCHAR(100) NOT NULL,
+    [LastName] NVARCHAR(100) NOT NULL,
+    [Company] NVARCHAR(200) NULL,
+    [AddressLine1] NVARCHAR(500) NOT NULL,
+    [AddressLine2] NVARCHAR(500) NULL,
+    [City] NVARCHAR(100) NOT NULL,
+    [State] NVARCHAR(100) NOT NULL,
+    [PostalCode] NVARCHAR(20) NOT NULL,
+    [Country] NVARCHAR(100) NOT NULL DEFAULT 'Turkey',
+    [PhoneNumber] NVARCHAR(20) NULL,
+    [IsDefault] BIT NOT NULL DEFAULT 0,
+    [IsActive] BIT NOT NULL DEFAULT 1,
+    [IsDeleted] BIT NOT NULL DEFAULT 0,
+    [CreatedAt] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    [UpdatedAt] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    [CreatedBy] UNIQUEIDENTIFIER NULL,
+    [UpdatedBy] UNIQUEIDENTIFIER NULL
+);
+
+-- Categories Table
+CREATE TABLE [dbo].[Categories] (
+    [Id] UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWID(),
+    [Name] NVARCHAR(200) NOT NULL,
+    [Slug] NVARCHAR(200) NOT NULL UNIQUE,
+    [Description] NVARCHAR(1000) NULL,
+    [ParentId] UNIQUEIDENTIFIER NULL,
+    [ImageUrl] NVARCHAR(500) NULL,
+    [SortOrder] INT NOT NULL DEFAULT 0,
+    [IsActive] BIT NOT NULL DEFAULT 1,
+    [IsDeleted] BIT NOT NULL DEFAULT 0,
+    [CreatedAt] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    [UpdatedAt] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    [CreatedBy] UNIQUEIDENTIFIER NULL,
+    [UpdatedBy] UNIQUEIDENTIFIER NULL
+);
+
+-- Stores Table
+CREATE TABLE [dbo].[Stores] (
+    [Id] UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWID(),
+    [Name] NVARCHAR(200) NOT NULL,
+    [Slug] NVARCHAR(200) NOT NULL UNIQUE,
+    [Description] NVARCHAR(2000) NULL,
+    [LogoUrl] NVARCHAR(500) NULL,
+    [BannerUrl] NVARCHAR(500) NULL,
+    [Email] NVARCHAR(256) NOT NULL,
+    [PhoneNumber] NVARCHAR(20) NULL,
+    [Website] NVARCHAR(500) NULL,
+    [AddressLine1] NVARCHAR(500) NULL,
+    [AddressLine2] NVARCHAR(500) NULL,
+    [City] NVARCHAR(100) NULL,
+    [State] NVARCHAR(100) NULL,
+    [PostalCode] NVARCHAR(20) NULL,
+    [Country] NVARCHAR(100) NULL DEFAULT 'Turkey',
+    [TaxNumber] NVARCHAR(50) NULL,
+    [IsActive] BIT NOT NULL DEFAULT 1,
+    [IsVerified] BIT NOT NULL DEFAULT 0,
+    [IsDeleted] BIT NOT NULL DEFAULT 0,
+    [CreatedAt] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    [UpdatedAt] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    [CreatedBy] UNIQUEIDENTIFIER NULL,
+    [UpdatedBy] UNIQUEIDENTIFIER NULL
+);
+
+-- StoreUsers Table (Many-to-Many)
+CREATE TABLE [dbo].[StoreUsers] (
+    [StoreId] UNIQUEIDENTIFIER NOT NULL,
+    [UserId] UNIQUEIDENTIFIER NOT NULL,
+    [Role] NVARCHAR(50) NOT NULL, -- Owner, Manager, Employee
+    [IsActive] BIT NOT NULL DEFAULT 1,
+    [CreatedAt] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    [CreatedBy] UNIQUEIDENTIFIER NULL,
+    PRIMARY KEY ([StoreId], [UserId])
+);

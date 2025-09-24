@@ -1,0 +1,107 @@
+-- =============================================
+-- Other Tables
+-- =============================================
+
+-- Coupons Table
+CREATE TABLE [dbo].[Coupons] (
+    [Id] UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWID(),
+    [Code] NVARCHAR(50) NOT NULL UNIQUE,
+    [Name] NVARCHAR(200) NOT NULL,
+    [Description] NVARCHAR(500) NULL,
+    [Type] NVARCHAR(20) NOT NULL, -- Percentage, FixedAmount
+    [Value] DECIMAL(18,2) NOT NULL,
+    [MinimumAmount] DECIMAL(18,2) NULL,
+    [MaximumDiscount] DECIMAL(18,2) NULL,
+    [UsageLimit] INT NULL,
+    [UsedCount] INT NOT NULL DEFAULT 0,
+    [ValidFrom] DATETIME2 NOT NULL,
+    [ValidTo] DATETIME2 NOT NULL,
+    [IsActive] BIT NOT NULL DEFAULT 1,
+    [IsDeleted] BIT NOT NULL DEFAULT 0,
+    [CreatedAt] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    [UpdatedAt] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    [CreatedBy] UNIQUEIDENTIFIER NULL,
+    [UpdatedBy] UNIQUEIDENTIFIER NULL
+);
+
+-- CouponUsage Table
+CREATE TABLE [dbo].[CouponUsage] (
+    [Id] UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWID(),
+    [CouponId] UNIQUEIDENTIFIER NOT NULL,
+    [UserId] UNIQUEIDENTIFIER NOT NULL,
+    [OrderId] UNIQUEIDENTIFIER NOT NULL,
+    [DiscountAmount] DECIMAL(18,2) NOT NULL,
+    [CreatedAt] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    [CreatedBy] UNIQUEIDENTIFIER NULL
+);
+
+-- MessageThreads Table
+CREATE TABLE [dbo].[MessageThreads] (
+    [Id] UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWID(),
+    [Subject] NVARCHAR(200) NOT NULL,
+    [IsActive] BIT NOT NULL DEFAULT 1,
+    [IsDeleted] BIT NOT NULL DEFAULT 0,
+    [CreatedAt] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    [UpdatedAt] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    [CreatedBy] UNIQUEIDENTIFIER NULL,
+    [UpdatedBy] UNIQUEIDENTIFIER NULL
+);
+
+-- Messages Table
+CREATE TABLE [dbo].[Messages] (
+    [Id] UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWID(),
+    [ThreadId] UNIQUEIDENTIFIER NOT NULL,
+    [SenderId] UNIQUEIDENTIFIER NOT NULL,
+    [ReceiverId] UNIQUEIDENTIFIER NOT NULL,
+    [Content] NVARCHAR(MAX) NOT NULL,
+    [IsRead] BIT NOT NULL DEFAULT 0,
+    [ReadAt] DATETIME2 NULL,
+    [IsActive] BIT NOT NULL DEFAULT 1,
+    [IsDeleted] BIT NOT NULL DEFAULT 0,
+    [CreatedAt] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    [UpdatedAt] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    [CreatedBy] UNIQUEIDENTIFIER NULL,
+    [UpdatedBy] UNIQUEIDENTIFIER NULL
+);
+
+-- Favorites Table
+CREATE TABLE [dbo].[Favorites] (
+    [UserId] UNIQUEIDENTIFIER NOT NULL,
+    [Type] NVARCHAR(20) NOT NULL, -- Product, Store
+    [ItemId] UNIQUEIDENTIFIER NOT NULL,
+    [CreatedAt] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    [CreatedBy] UNIQUEIDENTIFIER NULL,
+    PRIMARY KEY ([UserId], [Type], [ItemId])
+);
+
+-- Reviews Table
+CREATE TABLE [dbo].[Reviews] (
+    [Id] UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWID(),
+    [ProductId] UNIQUEIDENTIFIER NOT NULL,
+    [UserId] UNIQUEIDENTIFIER NOT NULL,
+    [OrderId] UNIQUEIDENTIFIER NULL,
+    [Rating] INT NOT NULL CHECK ([Rating] >= 1 AND [Rating] <= 5),
+    [Title] NVARCHAR(200) NULL,
+    [Comment] NVARCHAR(1000) NULL,
+    [IsVerified] BIT NOT NULL DEFAULT 0,
+    [IsActive] BIT NOT NULL DEFAULT 1,
+    [IsDeleted] BIT NOT NULL DEFAULT 0,
+    [CreatedAt] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    [UpdatedAt] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    [CreatedBy] UNIQUEIDENTIFIER NULL,
+    [UpdatedBy] UNIQUEIDENTIFIER NULL
+);
+
+-- AuditLogs Table
+CREATE TABLE [dbo].[AuditLogs] (
+    [Id] UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWID(),
+    [EntityName] NVARCHAR(100) NOT NULL,
+    [EntityId] UNIQUEIDENTIFIER NOT NULL,
+    [Action] NVARCHAR(50) NOT NULL, -- Create, Update, Delete
+    [OldValues] NVARCHAR(MAX) NULL,
+    [NewValues] NVARCHAR(MAX) NULL,
+    [UserId] UNIQUEIDENTIFIER NULL,
+    [IpAddress] NVARCHAR(50) NULL,
+    [UserAgent] NVARCHAR(500) NULL,
+    [CreatedAt] DATETIME2 NOT NULL DEFAULT GETUTCDATE()
+);

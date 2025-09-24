@@ -1,0 +1,134 @@
+{
+  "info": {
+    "name": "xBazar API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": { "major": 1, "minor": 0, "patch": 0 },
+    "description": "xBazar backend API collection"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        { "name": "Login", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "url": "{{baseUrl}}/api/auth/login", "body": { "mode": "raw", "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"P@ssw0rd!\"\n}" } } },
+        { "name": "Refresh", "request": { "method": "POST", "url": "{{baseUrl}}/api/auth/refresh" } },
+        { "name": "Logout", "request": { "method": "POST", "url": "{{baseUrl}}/api/auth/logout" } }
+      ]
+    },
+    {
+      "name": "Users",
+      "auth": { "type": "bearer", "bearer": [{"key":"token","value":"{{token}}","type":"string"}] },
+      "item": [
+        { "name": "Get Me", "request": { "method": "GET", "url": "{{baseUrl}}/api/users/me" } },
+        { "name": "Update My Profile", "request": { "method": "PUT", "header":[{"key":"Content-Type","value":"application/json"}], "url": "{{baseUrl}}/api/users/me/profile", "body": { "mode":"raw","raw":"{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"phoneNumber\": \"+905555555555\"\n}" } } },
+        { "name": "Change Password", "request": { "method": "POST", "header":[{"key":"Content-Type","value":"application/json"}], "url": "{{baseUrl}}/api/users/change-password", "body": { "mode":"raw","raw":"{\n  \"currentPassword\": \"Old!23\",\n  \"newPassword\": \"New!23Strong\"\n}" } } }
+      ]
+    },
+    {
+      "name": "Addresses",
+      "auth": { "type": "bearer", "bearer": [{"value":"{{token}}"}] },
+      "item": [
+        { "name": "List", "request": { "method": "GET", "url": "{{baseUrl}}/api/addresses" } },
+        { "name": "Create", "request": { "method": "POST", "header":[{"key":"Content-Type","value":"application/json"}], "url": "{{baseUrl}}/api/addresses", "body": { "mode":"raw","raw":"{\n  \"title\": \"Ev\",\n  \"addressLine1\": \"Sokak 1\",\n  \"city\": \"İstanbul\",\n  \"state\": \"TR\",\n  \"postalCode\": \"34000\",\n  \"country\": \"Turkey\",\n  \"isDefault\": true\n}" } } },
+        { "name": "Set Default", "request": { "method": "POST", "url": "{{baseUrl}}/api/addresses/{{addressId}}/default" } },
+        { "name": "Delete", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/addresses/{{addressId}}" } }
+      ]
+    },
+    {
+      "name": "Payment Methods",
+      "auth": { "type": "bearer", "bearer": [{"value":"{{token}}"}] },
+      "item": [
+        { "name": "List", "request": { "method": "GET", "url": "{{baseUrl}}/api/paymentmethods" } },
+        { "name": "Create (tokenized)", "request": { "method": "POST", "header":[{"key":"Content-Type","value":"application/json"}], "url": "{{baseUrl}}/api/paymentmethods", "body": { "mode":"raw","raw":"{\n  \"provider\": \"iyzico\",\n  \"token\": \"tok_123\",\n  \"last4\": \"4242\",\n  \"brand\": \"VISA\",\n  \"expiryMonth\": \"12\",\n  \"expiryYear\": \"2030\",\n  \"label\": \"Kredi Kartım\",\n  \"isDefault\": true\n}" } } },
+        { "name": "Set Default", "request": { "method": "POST", "url": "{{baseUrl}}/api/paymentmethods/{{paymentMethodId}}/default" } },
+        { "name": "Delete", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/paymentmethods/{{paymentMethodId}}" } }
+      ]
+    },
+    {
+      "name": "Stores",
+      "auth": { "type": "bearer", "bearer": [{"value":"{{token}}"}] },
+      "item": [
+        { "name": "Get", "request": { "method": "GET", "url": "{{baseUrl}}/api/stores/{{storeId}}" } },
+        { "name": "Follow", "request": { "method": "POST", "url": "{{baseUrl}}/api/stores/{{storeId}}/follow" } },
+        { "name": "Unfollow", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/stores/{{storeId}}/follow" } },
+        { "name": "My Followed Stores", "request": { "method": "GET", "url": "{{baseUrl}}/api/stores/followed" } }
+      ]
+    },
+    {
+      "name": "Favorites",
+      "auth": { "type": "bearer", "bearer": [{"value":"{{token}}"}] },
+      "item": [
+        { "name": "Add Product Favorite", "request": { "method": "POST", "url": { "raw": "{{baseUrl}}/api/favorites?type=Product&itemId={{productId}}" } } },
+        { "name": "Remove Product Favorite", "request": { "method": "DELETE", "url": { "raw": "{{baseUrl}}/api/favorites?type=Product&itemId={{productId}}" } } },
+        { "name": "List Product Favorites", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/favorites?type=Product" } } }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        { "name": "Advanced Search", "request": { "method": "POST", "header":[{"key":"Content-Type","value":"application/json"}], "url": "{{baseUrl}}/api/products/search-advanced", "body": { "mode":"raw","raw":"{\n  \"searchTerm\": \"phone\",\n  \"sortBy\": \"price_asc\",\n  \"page\": 1,\n  \"pageSize\": 20\n}" } } }
+      ]
+    },
+    {
+      "name": "Orders",
+      "auth": { "type": "bearer", "bearer": [{"value":"{{token}}"}] },
+      "item": [
+        { "name": "Create", "request": { "method": "POST", "header":[{"key":"Content-Type","value":"application/json"}], "url": "{{baseUrl}}/api/orders", "body": { "mode":"raw","raw":"{\n  \"storeId\": \"{{storeId}}\",\n  \"shippingAddressId\": \"{{addressId}}\",\n  \"orderItems\": [{ \n    \"productId\": \"{{productId}}\", \n    \"quantity\": 1\n  }]\n}" } } },
+        { "name": "Process Payment", "request": { "method": "POST", "header":[{"key":"Content-Type","value":"application/json"}], "url": "{{baseUrl}}/api/orders/{{orderId}}/payment", "body": { "mode":"raw","raw":"{\n  \"paymentMethod\": \"iyzico\",\n  \"cardNumber\": \"4111111111111111\",\n  \"cardHolderName\": \"JOHN DOE\",\n  \"expiryMonth\": \"12\",\n  \"expiryYear\": \"2030\",\n  \"cvv\": \"123\",\n  \"idempotencyKey\": \"{{idempotency}}\"\n}" } } },
+        { "name": "Refund Request", "request": { "method": "POST", "header":[{"key":"Content-Type","value":"application/json"}], "url": "{{baseUrl}}/api/orders/{{orderId}}/refund-request", "body": { "mode":"raw","raw":"{\n  \"amount\": 10.0,\n  \"reason\": \"Damaged\"\n}" } } }
+      ]
+    },
+    {
+      "name": "Messages",
+      "auth": { "type": "bearer", "bearer": [{"value":"{{token}}"}] },
+      "item": [
+        { "name": "Create Thread", "request": { "method": "POST", "header":[{"key":"Content-Type","value":"application/json"}], "url": "{{baseUrl}}/api/messages/threads", "body": { "mode":"raw","raw":"{\n  \"otherUserId\": \"{{otherUserId}}\",\n  \"subject\": \"Order Inquiry\"\n}" } } },
+        { "name": "List Messages", "request": { "method": "GET", "url": "{{baseUrl}}/api/messages/threads/{{threadId}}/messages" } },
+        { "name": "Send Message", "request": { "method": "POST", "header":[{"key":"Content-Type","value":"application/json"}], "url": "{{baseUrl}}/api/messages/threads/{{threadId}}/messages", "body": { "mode":"raw","raw":"{\n  \"content\": \"Hello\"\n}" } } },
+        { "name": "Unread Count", "request": { "method": "GET", "url": "{{baseUrl}}/api/messages/unread-count" } }
+      ]
+    },
+    {
+      "name": "Shipping",
+      "auth": { "type": "bearer", "bearer": [{"value":"{{token}}"}] },
+      "item": [
+        { "name": "Create Label", "request": { "method": "POST", "url": "{{baseUrl}}/api/shipping/orders/{{orderId}}/label?carrier={{carrier}}" } },
+        { "name": "Create Manifest", "request": { "method": "POST", "url": "{{baseUrl}}/api/shipping/stores/{{storeId}}/manifest?date={{date}}&carrier={{carrier}}" } },
+        { "name": "Schedule Pickup", "request": { "method": "POST", "url": "{{baseUrl}}/api/shipping/stores/{{storeId}}/pickup?pickupAt={{pickupAt}}&carrier={{carrier}}" } }
+      ]
+    },
+    {
+      "name": "Reports",
+      "auth": { "type": "bearer", "bearer": [{"value":"{{token}}"}] },
+      "item": [
+        { "name": "Export Orders CSV", "request": { "method": "GET", "url": "{{baseUrl}}/api/reports/orders/export?from={{from}}&to={{to}}&storeId={{storeId}}" } },
+        { "name": "Revenue", "request": { "method": "GET", "url": "{{baseUrl}}/api/reports/revenue?from={{from}}&to={{to}}&storeId={{storeId}}&page=1&pageSize=50" } }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        { "name": "Webhook (provider)", "request": { "method": "POST", "url": "{{baseUrl}}/api/payments/webhook/iyzico" } },
+        { "name": "Success", "request": { "method": "GET", "url": "{{baseUrl}}/api/payments/success?orderNumber={{orderNumber}}" } },
+        { "name": "Fail", "request": { "method": "GET", "url": "{{baseUrl}}/api/payments/fail?orderNumber={{orderNumber}}&error=reason" } }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "https://localhost:7001" },
+    { "key": "token", "value": "" },
+    { "key": "storeId", "value": "" },
+    { "key": "productId", "value": "" },
+    { "key": "orderId", "value": "" },
+    { "key": "addressId", "value": "" },
+    { "key": "paymentMethodId", "value": "" },
+    { "key": "threadId", "value": "" },
+    { "key": "otherUserId", "value": "" },
+    { "key": "carrier", "value": "ups" },
+    { "key": "date", "value": "2025-09-24" },
+    { "key": "pickupAt", "value": "2025-09-24T15:00:00Z" },
+    { "key": "from", "value": "2025-09-01" },
+    { "key": "to", "value": "2025-09-30" },
+    { "key": "idempotency", "value": "idem-123" },
+    { "key": "orderNumber", "value": "" }
+  ]
+}
