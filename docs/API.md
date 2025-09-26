@@ -120,14 +120,68 @@ xBazar platformunun API servisidir. Bu proje, Domain-Driven Design (DDD) yaklaş
 - **Weak Password**: `400 Bad Request` - Şifre güvenlik gereksinimlerini karşılamıyor
 - **Invalid Email Format**: `400 Bad Request` - Geçersiz email formatı
 
-#### 1.3 Token Yenileme
-**Endpoint**: `POST /api/auth/refresh`
+#### 1.3 Token Yenileme (Refresh Token)
+**Endpoint**: `POST /api/auth/refresh-token`
 
 **Business Logic**:
-- **JWT Service**: `IJwtService.RefreshToken()` ile token yenilenir
-- Refresh token geçerlilik kontrolü
-- Yeni access token oluşturulur
-- Eski refresh token iptal edilir
+- **AuthService.RefreshTokenAsync()** metodu çağrılır
+- Access token'dan JWT ID (jti) claim'i alınır
+- Refresh token veritabanında doğrulanır (hash kontrolü)
+- Token rotation: Yeni access + refresh token üretilir
+- Eski refresh token "used" olarak işaretlenir
+- Token family tracking ile güvenlik sağlanır
+
+**Request Body**:
+```json
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refreshToken": "refresh_token_here"
+}
+```
+
+**Response**:
+```json
+{
+  "isSuccess": true,
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "refreshToken": "new_refresh_token_here",
+    "expiresAt": "2025-09-24T14:34:56Z",
+    "user": {
+      "id": "12345678-1234-1234-1234-123456789012",
+      "email": "user@example.com",
+      "userName": "user",
+      "firstName": "John",
+      "lastName": "Doe",
+      "emailConfirmed": true,
+      "roles": ["User"]
+    }
+  },
+  "message": "Token refreshed successfully",
+  "statusCode": 200
+}
+```
+
+**Cookie Desteği**:
+- Refresh token otomatik olarak HttpOnly cookie'ye kaydedilir
+- Cookie: `refresh_token` (HttpOnly, Secure, SameSite=Strict)
+- Süre: 7 gün (yapılandırılabilir)
+
+**Özel Durumlar**:
+- **Invalid Access Token**: `401 Unauthorized` - Geçersiz veya süresi dolmuş access token
+- **Invalid Refresh Token**: `401 Unauthorized` - Geçersiz refresh token
+- **Token Expired**: `401 Unauthorized` - Refresh token süresi dolmuş
+- **Token Reuse Detected**: `401 Unauthorized` - Aynı refresh token tekrar kullanılmış (güvenlik ihlali)
+- **User Not Found**: `401 Unauthorized` - Kullanıcı bulunamadı veya deaktif
+
+#### 1.4 Çıkış (Logout)
+**Endpoint**: `POST /api/auth/logout`
+
+**Business Logic**:
+- **AuthService.LogoutAsync()** metodu çağrılır
+- Refresh token veritabanında iptal edilir
+- HttpOnly cookie temizlenir
+- Token family güvenliği sağlanır
 
 **Request Body**:
 ```json
@@ -140,19 +194,14 @@ xBazar platformunun API servisidir. Bu proje, Domain-Driven Design (DDD) yaklaş
 ```json
 {
   "isSuccess": true,
-  "data": {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "refreshToken": "new_refresh_token_here",
-    "expiresAt": "2025-09-24T14:34:56Z"
-  },
-  "message": "Token refreshed successfully",
+  "data": true,
+  "message": "Logout successful",
   "statusCode": 200
 }
 ```
 
 **Özel Durumlar**:
-- **Invalid Refresh Token**: `401 Unauthorized` - Geçersiz veya süresi dolmuş refresh token
-- **Token Expired**: `401 Unauthorized` - Refresh token süresi dolmuş
+- **Invalid Refresh Token**: `400 Bad Request` - Geçersiz refresh token
 
 ---
 
@@ -161,8 +210,11 @@ xBazar platformunun API servisidir. Bu proje, Domain-Driven Design (DDD) yaklaş
 ### JWT Bearer Token
 - Authorization header: `Authorization: Bearer <token>`
 - Token içinde `sub` (Guid) claim'i kullanıcı kimliği olarak kullanılır
-- Token süresi: 15 dakika (yapılandırılabilir)
-- Refresh token süresi: 7 gün
+- **JWT ID (jti)**: Her token'ın benzersiz kimliği
+- **Access Token süresi**: 15 dakika (yapılandırılabilir)
+- **Refresh Token süresi**: 7 gün (yapılandırılabilir)
+- **Token Rotation**: Her refresh işleminde yeni token çifti üretilir
+- **Database Storage**: Refresh token'lar veritabanında hash'lenerek saklanır
 
 ### API Key (Opsiyonel)
 - Header: `X-Api-Key: <key>`
@@ -267,6 +319,13 @@ ETag: "<new-etag>"
 ## Güvenlik Başlıkları ve Oran Sınırlama
 - Güvenlik başlıkları middleware üzerinden uygulanır (HSTS, CORS yapılandırması önerilir).
 - Rate limiting in-memory; dağıtık için geliştirme planı mevcuttur.
+
+### CSRF Koruması
+- **CSRF Protection Middleware** aktif
+- State-changing operasyonlar (POST, PUT, PATCH, DELETE) için CSRF token gerekli
+- **Header**: `X-XSRF-TOKEN: <token>`
+- **Cookie**: `XSRF-TOKEN` (JavaScript erişilebilir)
+- **Güvenli Endpoint'ler**: GET, HEAD, OPTIONS ve auth endpoint'leri hariç
 
 ## Swagger/OpenAPI
 - `ApiResponseOperationFilter` ile başarı ve hata örnekleri eklenir.
@@ -868,6 +927,15 @@ GET /health
 - ETag ile optimistik eşzamanlılık uygulayın
 - Policy tabanlı yetkilendirme kullanın, rollere doğrudan bağlanmayın
 - Problem+json ile hataları standartlaştırın
+
+### Refresh Token Güvenlik Özellikleri
+- **Token Rotation**: Her refresh işleminde yeni token çifti üretilir
+- **Reuse Detection**: Aynı refresh token tekrar kullanılırsa tüm token ailesi iptal edilir
+- **Database Storage**: Token'lar hash'lenerek veritabanında saklanır
+- **HttpOnly Cookie**: XSS saldırılarına karşı koruma
+- **SameSite=Strict**: CSRF saldırılarına karşı koruma
+- **JWT ID Tracking**: Her access token'ın benzersiz kimliği takip edilir
+- **Token Family Revocation**: Güvenlik ihlali durumunda tüm token'lar iptal edilir
 
 ---
 

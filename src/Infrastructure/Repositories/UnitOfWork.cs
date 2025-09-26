@@ -38,6 +38,7 @@ public class UnitOfWork : IUnitOfWork
         Reviews = new Repository<Core.Entities.Review>(_context);
         AuditLogs = new Repository<Core.Entities.AuditLog>(_context);
         SecurityEvents = new Repository<Core.Entities.SecurityEvent>(_context);
+        RefreshTokens = new RefreshTokenRepository(_context);
     }
 
     public IRepository<Core.Entities.User> Users { get; }
@@ -65,6 +66,7 @@ public class UnitOfWork : IUnitOfWork
     public IRepository<Core.Entities.Review> Reviews { get; }
     public IRepository<Core.Entities.AuditLog> AuditLogs { get; }
     public IRepository<Core.Entities.SecurityEvent> SecurityEvents { get; }
+    public IRefreshTokenRepository RefreshTokens { get; }
 
     public async Task<int> SaveChangesAsync()
     {

@@ -64,6 +64,14 @@ app.UseForwardedHeaders();
 // Use API middleware
 app.UseApiMiddleware();
 
+// Configure Swagger
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "xBazar API v1");
+    c.RoutePrefix = "swagger";
+});
+
 // Configure authorization policies using the built service provider (safe at this point)
 using (var scope = app.Services.CreateScope())
 {

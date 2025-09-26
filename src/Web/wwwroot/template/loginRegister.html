@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PazarYeri | Hesap Oluştur</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #008060;
+            --primary-light: #00a37a;
+            --primary-dark: #005e46;
+            --secondary: #6b7177;
+            --accent: #ff5c35;
+            --dark: #202223;
+            --dark-light: #404345;
+            --light: #f6f6f7;
+            --light-dark: #e6e6e6;
+            --card-bg: #ffffff;
+            --card-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            --success: #008060;
+            --warning: #ffc453;
+            --buyer-color: #4a6cf7;
+            --seller-color: #008060;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7f9 0%, #e6f0f2 100%);
+            color: var(--dark);
+            overflow-x: hidden;
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            display: flex;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .welcome-section {
+            flex: 1;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .form-section {
+            flex: 1.2;
+            padding: 40px;
+        }
+        
+        .welcome-logo {
+            margin-bottom: 30px;
+        }
+        
+        .welcome-logo h1 {
+            font-size: 32px;
+            font-weight: 700;
+        }
+        
+        .welcome-logo span {
+            color: #ffd700;
+        }
+        
+        .welcome-content h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+        
+        .welcome-content p {
+            margin-bottom: 15px;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .welcome-features {
+            margin-top: 30px;
+        }
+        
+        .feature {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .feature-icon {
+            width: 30px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+        
+        .form-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .form-header h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+        
+        .form-header p {
+            color: var(--secondary);
+            font-size: 15px;
+        }
+        
+        .account-type {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .account-option {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid var(--light-dark);
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .account-option:hover {
+            border-color: var(--primary);
+        }
+        
+        .account-option.active {
+            border-color: var(--primary);
+            background: rgba(0, 128, 96, 0.05);
+        }
+        
+        .account-option.buyer.active {
+            border-color: var(--buyer-color);
+            background: rgba(74, 108, 247, 0.05);
+        }
+        
+        .account-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: var(--secondary);
+        }
+        
+        .account-option.active .account-icon {
+            color: var(--primary);
+        }
+        
+        .account-option.buyer.active .account-icon {
+            color: var(--buyer-color);
+        }
+        
+        .account-option h3 {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        
+        .account-option p {
+            font-size: 13px;
+            color: var(--secondary);
+        }
+        
+        .form-tabs {
+            display: flex;
+            margin-bottom: 25px;
+            border-bottom: 1px solid var(--light-dark);
+        }
+        
+        .form-tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--secondary);
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .form-tab.active {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+        }
+        
+        .buyer-mode .form-tab.active {
+            color: var(--buyer-color);
+            border-bottom: 3px solid var(--buyer-color);
+        }
+        
+        .form-content {
+            display: none;
+        }
+        
+        .form-content.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 18px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+            font-size: 14px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--light-dark);
+            border-radius: 6px;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 128, 96, 0.1);
+        }
+        
+        .buyer-mode .form-input:focus {
+            border-color: var(--buyer-color);
+            box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.1);
+        }
+        
+        .password-toggle {
+            position: relative;
+        }
+        
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--secondary);
+            cursor: pointer;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .terms-checkbox {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .terms-checkbox input[type="checkbox"] {
+            margin-top: 3px;
+            width: 16px;
+            height: 16px;
+            accent-color: var(--primary);
+        }
+        
+        .buyer-mode .terms-checkbox input[type="checkbox"] {
+            accent-color: var(--buyer-color);
+        }
+        
+        .terms-checkbox label {
+            font-size: 14px;
+            color: var(--secondary);
+        }
+        
+        .terms-checkbox a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+        
+        .buyer-mode .terms-checkbox a {
+            color: var(--buyer-color);
+        }
+        
+        .terms-checkbox a:hover {
+            text-decoration: underline;
+        }
+        
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            text-align: center;
+            text-decoration: none;
+            font-size: 16px;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+        
+        .buyer-mode .btn-primary {
+            background: var(--buyer-color);
+        }
+        
+        .buyer-mode .btn-primary:hover {
+            background: #3a56e0;
+        }
+        
+        .btn-google {
+            background: white;
+            color: var(--dark);
+            border: 1px solid var(--light-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .btn-google:hover {
+            background: var(--light);
+        }
+        
+        .form-footer {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 14px;
+            color: var(--secondary);
+        }
+        
+        .form-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .buyer-mode .form-footer a {
+            color: var(--buyer-color);
+        }
+        
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .alert {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .alert-error {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+        }
+        
+        .alert-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+        
+        .seller-fields {
+            display: block;
+        }
+        
+        .buyer-mode .seller-fields {
+            display: none;
+        }
+        
+        /* Responsive */
+        @media (max-width: 900px) {
+            .container {
+                flex-direction: column;
+                max-width: 500px;
+            }
+            
+            .welcome-section {
+                padding: 30px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .account-type {
+                flex-direction: column;
+            }
+            
+            .form-tabs {
+                flex-direction: column;
+                border-bottom: none;
+                gap: 10px;
+            }
+            
+            .form-tab {
+                border-bottom: none;
+                border-left: 3px solid transparent;
+            }
+            
+            .form-tab.active {
+                border-bottom: none;
+                border-left: 3px solid var(--primary);
+            }
+            
+            .buyer-mode .form-tab.active {
+                border-left: 3px solid var(--buyer-color);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="welcome-section">
+            <div class="welcome-logo">
+                <h1>Pazar<span>Yeri</span></h1>
+            </div>
+            
+            <div class="welcome-content">
+                <h2>PazarYeri'ne Hoş Geldiniz</h2>
+                <p>Türkiye'nin en güvenilir online alışveriş platformunda siz de yerinizi alın.</p>
+                <p>Binlerce ürün ve yüzlerce mağaza ile ihtiyacınız olan her şey burada.</p>
+            </div>
+            
+            <div class="welcome-features">
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-shipping-fast"></i>
+                    </div>
+                    <div>Hızlı ve güvenli teslimat</div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div>Güvenli ödeme sistemi</div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <div>7/24 müşteri desteği</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <div class="form-header">
+                <h2>Hesap Oluştur</h2>
+                <p>PazarYeri'nde alışveriş yapmak veya mağaza açmak için hesap oluşturun</p>
+            </div>
+            
+            <div class="account-type">
+                <div class="account-option buyer active" id="buyerOption">
+                    <div class="account-icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <h3>Alıcı Olarak</h3>
+                    <p>Alışveriş yapmak için</p>
+                </div>
+                <div class="account-option" id="sellerOption">
+                    <div class="account-icon">
+                        <i class="fas fa-store"></i>
+                    </div>
+                    <h3>Satıcı Olarak</h3>
+                    <p>Mağaza açmak için</p>
+                </div>
+            </div>
+            
+            <div class="form-tabs">
+                <div class="form-tab active" data-tab="register">Kayıt Ol</div>
+                <div class="form-tab" data-tab="login">Giriş Yap</div>
+            </div>
+            
+            <div class="alert alert-error" id="errorAlert">
+                <i class="fas fa-exclamation-circle"></i> 
+                <span id="errorMessage">Lütfen tüm alanları doğru şekilde doldurun</span>
+            </div>
+            
+            <div class="alert alert-success" id="successAlert">
+                <i class="fas fa-check-circle"></i> 
+                <span>Kayıt başarılı, yönlendiriliyorsunuz...</span>
+            </div>
+            
+            <!-- Kayıt Formu -->
+            <form id="registerForm" class="form-content active">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Ad</label>
+                        <input type="text" class="form-input" id="firstName" placeholder="Adınız" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Soyad</label>
+                        <input type="text" class="form-input" id="lastName" placeholder="Soyadınız" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">E-posta Adresi</label>
+                    <input type="email" class="form-input" id="email" placeholder="ornek@pazaryeri.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Telefon Numarası</label>
+                    <input type="tel" class="form-input" id="phone" placeholder="5XX XXX XX XX" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Şifre</label>
+                    <div class="password-toggle">
+                        <input type="password" class="form-input" id="password" placeholder="En az 8 karakter" required>
+                        <button type="button" class="toggle-password" id="togglePassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Şifre Tekrar</label>
+                    <div class="password-toggle">
+                        <input type="password" class="form-input" id="confirmPassword" placeholder="Şifrenizi tekrar girin" required>
+                        <button type="button" class="toggle-password" id="toggleConfirmPassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-group seller-fields">
+                    <label class="form-label">Mağaza Adı</label>
+                    <input type="text" class="form-input" id="storeName" placeholder="Mağazanızın adı">
+                </div>
+                
+                <div class="terms-checkbox">
+                    <input type="checkbox" id="termsAgreement" required>
+                    <label for="termsAgreement"><a href="#">Kullanım koşullarını</a> ve <a href="#">Gizlilik politikasını</a> okudum ve kabul ediyorum.</label>
+                </div>
+                
+                <div class="terms-checkbox">
+                    <input type="checkbox" id="newsletter">
+                    <label for="newsletter">PazarYeri'nden kampanya ve duyurular hakkında e-posta almak istiyorum.</label>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Hesap Oluştur</button>
+            </form>
+            
+            <!-- Giriş Formu -->
+            <form id="loginForm" class="form-content">
+                <div class="form-group">
+                    <label class="form-label">E-posta Adresi</label>
+                    <input type="email" class="form-input" id="loginEmail" placeholder="E-posta adresiniz" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Şifre</label>
+                    <div class="password-toggle">
+                        <input type="password" class="form-input" id="loginPassword" placeholder="Şifreniz" required>
+                        <button type="button" class="toggle-password" id="toggleLoginPassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="terms-checkbox">
+                    <input type="checkbox" id="rememberMe">
+                    <label for="rememberMe">Beni hatırla</label>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Giriş Yap</button>
+                
+                <div class="form-footer">
+                    <p><a href="#">Şifremi unuttum</a></p>
+                </div>
+            </form>
+            
+            <div class="form-footer">
+                <p>Zaten hesabınız var mı? <a href="#" id="switchToLogin">Giriş yapın</a></p>
+                <p><a href="../index.html">← Ana sayfaya dön</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const buyerOption = document.getElementById('buyerOption');
+            const sellerOption = document.getElementById('sellerOption');
+            const formTabs = document.querySelectorAll('.form-tab');
+            const formContents = document.querySelectorAll('.form-content');
+            const registerForm = document.getElementById('registerForm');
+            const loginForm = document.getElementById('loginForm');
+            const errorAlert = document.getElementById('errorAlert');
+            const successAlert = document.getElementById('successAlert');
+            const switchToLogin = document.getElementById('switchToLogin');
+            const formSection = document.querySelector('.form-section');
+            
+            // Hesap türü seçimi
+            buyerOption.addEventListener('click', function() {
+                buyerOption.classList.add('active');
+                sellerOption.classList.remove('active');
+                formSection.classList.add('buyer-mode');
+                formSection.classList.remove('seller-mode');
+            });
+            
+            sellerOption.addEventListener('click', function() {
+                sellerOption.classList.add('active');
+                buyerOption.classList.remove('active');
+                formSection.classList.remove('buyer-mode');
+                formSection.classList.add('seller-mode');
+            });
+            
+            // Tab değiştirme
+            formTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    formTabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    formContents.forEach(content => content.classList.remove('active'));
+                    document.getElementById(tabId + 'Form').classList.add('active');
+                    
+                    if (tabId === 'login') {
+                        switchToLogin.textContent = 'Hesap oluşturun';
+                    } else {
+                        switchToLogin.textContent = 'Giriş yapın';
+                    }
+                });
+            });
+            
+            // Giriş/Kayıt geçişi
+            switchToLogin.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                if (registerForm.classList.contains('active')) {
+                    formTabs.forEach(t => t.classList.remove('active'));
+                    document.querySelector('[data-tab="login"]').classList.add('active');
+                    
+                    formContents.forEach(content => content.classList.remove('active'));
+                    loginForm.classList.add('active');
+                    
+                    switchToLogin.textContent = 'Hesap oluşturun';
+                } else {
+                    formTabs.forEach(t => t.classList.remove('active'));
+                    document.querySelector('[data-tab="register"]').classList.add('active');
+                    
+                    formContents.forEach(content => content.classList.remove('active'));
+                    registerForm.classList.add('active');
+                    
+                    switchToLogin.textContent = 'Giriş yapın';
+                }
+            });
+            
+            // Şifre görünürlüğünü değiştirme
+            function setupPasswordToggle(toggleId, inputId) {
+                const toggleBtn = document.getElementById(toggleId);
+                const passwordInput = document.getElementById(inputId);
+                
+                toggleBtn.addEventListener('click', function() {
+                    if (passwordInput.type === 'password') {
+                        passwordInput.type = 'text';
+                        toggleBtn.innerHTML = '<i class="fas fa-eye-slash"></i>';
+                    } else {
+                        passwordInput.type = 'password';
+                        toggleBtn.innerHTML = '<i class="fas fa-eye"></i>';
+                    }
+                });
+            }
+            
+            setupPasswordToggle('togglePassword', 'password');
+            setupPasswordToggle('toggleConfirmPassword', 'confirmPassword');
+            setupPasswordToggle('toggleLoginPassword', 'loginPassword');
+            
+            // Telefon numarası formatlama
+            const phoneInput = document.getElementById('phone');
+            
+            phoneInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                
+                if (value.length > 0) {
+                    value = value.match(new RegExp('.{1,3}', 'g')).join(' ');
+                    if (value.length > 11) {
+                        value = value.substring(0, 11);
+                    }
+                }
+                
+                e.target.value = value;
+            });
+            
+            // Kayıt formu gönderimi
+            registerForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const firstName = document.getElementById('firstName').value;
+                const lastName = document.getElementById('lastName').value;
+                const email = document.getElementById('email').value;
+                const phone = document.getElementById('phone').value;
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                const storeName = document.getElementById('storeName').value;
+                const termsAgreement = document.getElementById('termsAgreement').checked;
+                const isSeller = sellerOption.classList.contains('active');
+                
+                // Doğrulama
+                if (!firstName || !lastName || !email || !phone || !password || !confirmPassword) {
+                    showError('Lütfen tüm alanları doldurun.');
+                    return;
+                }
+                
+                if (isSeller && !storeName) {
+                    showError('Mağaza adı zorunludur.');
+                    return;
+                }
+                
+                if (!termsAgreement) {
+                    showError('Kullanım koşullarını kabul etmelisiniz.');
+                    return;
+                }
+                
+                // E-posta formatı kontrolü
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    showError('Lütfen geçerli bir e-posta adresi girin.');
+                    return;
+                }
+                
+                // Telefon numarası kontrolü
+                if (phone.replace(/\s/g, '').length < 10) {
+                    showError('Lütfen geçerli bir telefon numarası girin.');
+                    return;
+                }
+                
+                // Şifre uzunluğu kontrolü
+                if (password.length < 6) {
+                    showError('Şifre en az 6 karakter olmalıdır.');
+                    return;
+                }
+                
+                // Şifre eşleşme kontrolü
+                if (password !== confirmPassword) {
+                    showError('Şifreler eşleşmiyor.');
+                    return;
+                }
+                
+                // Başarılı kayıt
+                showSuccess();
+                
+                // Yönlendirme
+                setTimeout(function() {
+                    const accountType = isSeller ? 'seller' : 'buyer';
+                    localStorage.setItem('accountType', accountType);
+                    localStorage.setItem('userEmail', email);
+                    
+                    if (isSeller) {
+                        window.location.href = 'dashboard.html';
+                    } else {
+                        window.location.href = '../index.html';
+                    }
+                }, 1500);
+            });
+            
+            // Giriş formu gönderimi
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+                const rememberMe = document.getElementById('rememberMe').checked;
+                
+                // Demo kullanıcı bilgileri
+                const demoUsers = [
+                    { email: 'alicı@demo.com', password: 'demo123', type: 'buyer' },
+                    { email: 'satici@demo.com', password: 'demo123', type: 'seller' },
+                    { email: 'ahmet@modaevim.com', password: 'ahmet123', type: 'seller' }
+                ];
+                
+                // Basit doğrulama
+                if (!email || !password) {
+                    showError('Lütfen tüm alanları doldurun.');
+                    return;
+                }
+                
+                // E-posta formatı kontrolü
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    showError('Lütfen geçerli bir e-posta adresi girin.');
+                    return;
+                }
+                
+                // Demo giriş kontrolü
+                const validUser = demoUsers.find(user => 
+                    user.email === email && user.password === password
+                );
+                
+                if (validUser) {
+                    // Başarılı giriş
+                    showSuccess();
+                    
+                    // Remember me seçeneği
+                    if (rememberMe) {
+                        localStorage.setItem('rememberedEmail', email);
+                    } else {
+                        localStorage.removeItem('rememberedEmail');
+                    }
+                    
+                    localStorage.setItem('accountType', validUser.type);
+                    
+                    // Yönlendirme
+                    setTimeout(function() {
+                        if (validUser.type === 'seller') {
+                            window.location.href = 'dashboard.html';
+                        } else {
+                            window.location.href = '../index.html';
+                        }
+                    }, 1500);
+                } else {
+                    // Hatalı giriş
+                    showError('E-posta adresi veya şifre hatalı.');
+                }
+            });
+            
+            // Hata mesajını göster
+            function showError(message) {
+                errorAlert.style.display = 'block';
+                document.getElementById('errorMessage').textContent = message;
+                successAlert.style.display = 'none';
+                
+                // 5 saniye sonra hata mesajını gizle
+                setTimeout(function() {
+                    errorAlert.style.display = 'none';
+                }, 5000);
+            }
+            
+            // Başarı mesajını göster
+            function showSuccess() {
+                successAlert.style.display = 'block';
+                errorAlert.style.display = 'none';
+            }
+            
+            // Remember me özelliği
+            const rememberedEmail = localStorage.getItem('rememberedEmail');
+            if (rememberedEmail) {
+                document.getElementById('loginEmail').value = rememberedEmail;
+                document.getElementById('rememberMe').checked = true;
+            }
+        });
+    </script>
+</body>
+</html>

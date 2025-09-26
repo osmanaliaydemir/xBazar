@@ -32,10 +32,14 @@ public class JwtService : IJwtService
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
+        var jti = Guid.NewGuid().ToString();
+        var claimsList = claims.ToList();
+        claimsList.Add(new Claim("jti", jti));
+
         var token = new JwtSecurityToken(
             issuer: _issuer,
             audience: _audience,
-            claims: claims,
+            claims: claimsList,
             expires: DateTime.UtcNow.AddMinutes(_accessTokenExpirationMinutes),
             signingCredentials: credentials
         );
@@ -106,5 +110,19 @@ public class JwtService : IJwtService
         var tokenHandler = new JwtSecurityTokenHandler();
         var jwtToken = tokenHandler.ReadJwtToken(token);
         return jwtToken.ValidTo;
+    }
+
+    public string? GetJwtId(string token)
+    {
+        try
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var jwtToken = tokenHandler.ReadJwtToken(token);
+            return jwtToken.Claims.FirstOrDefault(x => x.Type == "jti")?.Value;
+        }
+        catch
+        {
+            return null;
+        }
     }
 }

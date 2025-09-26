@@ -57,6 +57,10 @@ PRINT '11. Creating PaymentMethods Table...'
 PRINT '12. Creating SecurityEvents Table...'
 :r 15_CreateSecurityEventTable.sql
 
+-- 13. Create RefreshToken Table
+PRINT '13. Creating RefreshToken Table...'
+:r 16_CreateRefreshTokenTable.sql
+
 PRINT 'xBazar Database Setup Completed Successfully!'
 PRINT 'Database: xBazarDb'
 PRINT 'Tables Created: 20+'

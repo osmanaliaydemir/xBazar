@@ -29,6 +29,7 @@ public interface IUnitOfWork : IDisposable
     IRepository<Review> Reviews { get; }
     IRepository<AuditLog> AuditLogs { get; }
     IRepository<SecurityEvent> SecurityEvents { get; }
+    IRefreshTokenRepository RefreshTokens { get; }
     
     Task<int> SaveChangesAsync();
     Task BeginTransactionAsync();

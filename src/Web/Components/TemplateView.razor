@@ -1,0 +1,56 @@
+@if (string.IsNullOrEmpty(_renderedHtml))
+{
+    <div>Loading template...</div>
+}
+else
+{
+    @((MarkupString)_renderedHtml)
+}
+
+@code {
+    [Parameter] public string Source { get; set; } = string.Empty;
+
+    [Inject] private IWebHostEnvironment Env { get; set; } = default!;
+
+    private string? _renderedHtml;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var file = Env.WebRootFileProvider.GetFileInfo(Source);
+        if (!file.Exists)
+        {
+            _renderedHtml = $"<div style=\"color:red\">Template not found: {Source}</div>";
+            return;
+        }
+
+        using var stream = file.CreateReadStream();
+        using var reader = new StreamReader(stream, System.Text.Encoding.UTF8);
+        var html = await reader.ReadToEndAsync();
+
+        _renderedHtml = ExtractBodyContent(html);
+    }
+
+    private static string ExtractBodyContent(string html)
+    {
+        if (string.IsNullOrWhiteSpace(html)) return string.Empty;
+
+        var startIdx = html.IndexOf("<body", StringComparison.OrdinalIgnoreCase);
+        if (startIdx >= 0)
+        {
+            var bodyOpenEnd = html.IndexOf('>', startIdx);
+            if (bodyOpenEnd > startIdx)
+            {
+                var endIdx = html.IndexOf("</body>", bodyOpenEnd, StringComparison.OrdinalIgnoreCase);
+                if (endIdx > bodyOpenEnd)
+                {
+                    return html.Substring(bodyOpenEnd + 1, endIdx - bodyOpenEnd - 1);
+                }
+            }
+        }
+
+        // Fallback to full content if <body> not found
+        return html;
+    }
+}
+
+

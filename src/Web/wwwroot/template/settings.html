@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PazarYeri | Satıcı Paneli - Ayarlar</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #008060;
+            --primary-light: #00a37a;
+            --primary-dark: #005e46;
+            --secondary: #6b7177;
+            --accent: #ff5c35;
+            --dark: #202223;
+            --dark-light: #404345;
+            --light: #f6f6f7;
+            --light-dark: #e6e6e6;
+            --card-bg: #ffffff;
+            --card-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            --success: #008060;
+            --warning: #ffc453;
+            --sidebar-width: 250px;
+            --header-height: 70px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7f9;
+            color: var(--dark);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+        
+        /* Layout */
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--dark);
+            color: white;
+            position: fixed;
+            height: 100vh;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .sidebar-header h2 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .sidebar-header span {
+            color: var(--primary-light);
+        }
+        
+        .sidebar-menu {
+            padding: 20px 0;
+        }
+        
+        .menu-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+        
+        .menu-item:hover, .menu-item.active {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            border-left-color: var(--primary);
+        }
+        
+        .menu-item i {
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            width: calc(100% - var(--sidebar-width));
+        }
+        
+        /* Header */
+        .header {
+            background: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            padding: 0 20px;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: var(--light);
+            border-radius: 6px;
+            padding: 8px 15px;
+            width: 300px;
+        }
+        
+        .search-box input {
+            border: none;
+            background: transparent;
+            padding: 5px;
+            width: 100%;
+            outline: none;
+        }
+        
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+        }
+        
+        .notification {
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--accent);
+            color: white;
+            font-size: 10px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+        
+        /* Dropdown Menus */
+        .dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            width: 250px;
+            z-index: 1000;
+            display: none;
+            margin-top: 10px;
+        }
+        
+        .dropdown.active {
+            display: block;
+        }
+        
+        .dropdown-header {
+            padding: 15px;
+            border-bottom: 1px solid var(--light-dark);
+            font-weight: 600;
+        }
+        
+        .dropdown-item {
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--dark);
+            transition: all 0.3s;
+        }
+        
+        .dropdown-item:hover {
+            background: var(--light);
+        }
+        
+        .dropdown-item i {
+            width: 20px;
+            color: var(--secondary);
+        }
+        
+        .dropdown-footer {
+            padding: 10px 15px;
+            border-top: 1px solid var(--light-dark);
+            text-align: center;
+        }
+        
+        .notification-dropdown .dropdown-item {
+            border-bottom: 1px solid var(--light-dark);
+        }
+        
+        .notification-dropdown .dropdown-item:last-child {
+            border-bottom: none;
+        }
+        
+        .notification-title {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        
+        .notification-time {
+            font-size: 12px;
+            color: var(--secondary);
+        }
+        
+        /* Page Content */
+        .dashboard-content {
+            padding: 20px;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .page-content {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 30px;
+        }
+        
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--light-dark);
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            text-align: center;
+            text-decoration: none;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(0, 128, 96, 0.05);
+        }
+        
+        .settings-section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--light-dark);
+        }
+        
+        .settings-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: var(--dark);
+            font-weight: 600;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+        }
+        
+        .checkbox-item label {
+            cursor: pointer;
+        }
+        
+        .theme-selector {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .theme-option {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .theme-option.active {
+            border-color: var(--primary);
+        }
+        
+        .theme-light {
+            background: #ffffff;
+            border: 1px solid var(--light-dark);
+        }
+        
+        .theme-dark {
+            background: #1a1a1a;
+        }
+        
+        .theme-blue {
+            background: #e6f7ff;
+        }
+        
+        .theme-green {
+            background: #e6f7f0;
+        }
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 70px;
+            }
+            
+            .sidebar-header h2, .menu-item span {
+                display: none;
+            }
+            
+            .sidebar-header {
+                justify-content: center;
+            }
+            
+            .menu-item {
+                justify-content: center;
+                padding: 15px;
+            }
+            
+            .main-content {
+                margin-left: 70px;
+                width: calc(100% - 70px);
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .search-box {
+                width: 200px;
+            }
+            
+            .user-name {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .sidebar {
+                width: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+            
+            .header {
+                padding: 0 15px;
+            }
+            
+            .search-box {
+                display: none;
+            }
+            
+            .dashboard-content {
+                padding: 15px;
+            }
+            
+            .theme-selector {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-store"></i>
+                <h2>Satıcı <span>Paneli</span></h2>
+            </div>
+            <div class="sidebar-menu">
+                <a href="dashboard.html" class="menu-item">
+                    <i class="fas fa-th-large"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="products.html" class="menu-item">
+                    <i class="fas fa-box"></i>
+                    <span>Ürünlerim</span>
+                </a>
+                <a href="orders.html" class="menu-item">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>Siparişler</span>
+                </a>
+                <a href="store-info.html" class="menu-item">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Mağaza Bilgileri</span>
+                </a>
+                <a href="#" class="menu-item" id="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Çıkış</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Ara...">
+                </div>
+                <div class="user-menu">
+                    <div class="notification" id="notification-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">3</span>
+                        
+                        <!-- Notification Dropdown -->
+                        <div class="dropdown notification-dropdown">
+                            <div class="dropdown-header">Bildirimler</div>
+                            <a href="notification-detail.html?id=1" class="dropdown-item">
+                                <div class="notification-title">Yeni siparişiniz var</div>
+                                <div class="notification-time">10 dakika önce</div>
+                            </a>
+                            <a href="notification-detail.html?id=2" class="dropdown-item">
+                                <div class="notification-title">Ürün incelemesi eklendi</div>
+                                <div class="notification-time">2 saat önce</div>
+                            </a>
+                            <a href="notification-detail.html?id=3" class="dropdown-item">
+                                <div class="notification-title">Stok uyarısı: Ürün azalıyor</div>
+                                <div class="notification-time">1 gün önce</div>
+                            </a>
+                            <div class="dropdown-footer">
+                                <a href="notifications.html">Tüm bildirimleri görüntüle</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="user-profile" id="user-menu-btn">
+                        <div class="user-avatar">A</div>
+                        <div class="user-name">Ahmet Yılmaz</div>
+                        
+                        <!-- User Dropdown -->
+                        <div class="dropdown user-dropdown">
+                            <div class="dropdown-header">Ahmet Yılmaz</div>
+                            <a href="profile.html" class="dropdown-item">
+                                <i class="fas fa-user"></i>
+                                <span>Profil Bilgileri</span>
+                            </a>
+                            <a href="password.html" class="dropdown-item">
+                                <i class="fas fa-lock"></i>
+                                <span>Şifre Değiştir</span>
+                            </a>
+                            <a href="settings.html" class="dropdown-item active">
+                                <i class="fas fa-cog"></i>
+                                <span>Ayarlar</span>
+                            </a>
+                            <div class="dropdown-footer">
+                                <a href="#" id="logout-dropdown-btn">Çıkış Yap</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page Content -->
+            <div class="dashboard-content">
+                <h1 class="page-title">Ayarlar</h1>
+                
+                <div class="page-content">
+                    <form id="settingsForm">
+                        <!-- Genel Ayarlar -->
+                        <div class="settings-section">
+                            <h3 class="section-title">Genel Ayarlar</h3>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Dil Tercihi</label>
+                                    <select class="form-input">
+                                        <option>Türkçe</option>
+                                        <option>İngilizce</option>
+                                        <option>Almanca</option>
+                                        <option>Fransızca</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Para Birimi</label>
+                                    <select class="form-input">
+                                        <option>Türk Lirası (₺)</option>
+                                        <option>ABD Doları ($)</option>
+                                        <option>Euro (€)</option>
+                                        <option>İngiliz Sterlini (£)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Saat Dilimi</label>
+                                <select class="form-input">
+                                    <option>(GMT+3:00) İstanbul</option>
+                                    <option>(GMT+1:00) Londra</option>
+                                    <option>(GMT+2:00) Berlin</option>
+                                    <option>(GMT-5:00) New York</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Bildirim Ayarları -->
+                        <div class="settings-section">
+                            <h3 class="section-title">Bildirim Ayarları</h3>
+                            
+                            <div class="checkbox-group">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="email-notifications" checked>
+                                    <label for="email-notifications">E-posta bildirimleri</label>
+                                </div>
+                                
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="sms-notifications">
+                                    <label for="sms-notifications">SMS bildirimleri</label>
+                                </div>
+                                
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="order-notifications" checked>
+                                    <label for="order-notifications">Yeni sipariş uyarıları</label>
+                                </div>
+                                
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="stock-notifications" checked>
+                                    <label for="stock-notifications">Stok uyarıları</label>
+                                </div>
+                                
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="review-notifications" checked>
+                                    <label for="review-notifications">Ürün inceleme bildirimleri</label>
+                                </div>
+                                
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="promo-notifications">
+                                    <label for="promo-notifications">Promosyon ve kampanya bildirimleri</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Tema Ayarları -->
+                        <div class="settings-section">
+                            <h3 class="section-title">Tema Ayarları</h3>
+                            
+                            <div class="theme-selector">
+                                <div class="theme-option theme-light active" data-theme="light"></div>
+                                <div class="theme-option theme-dark" data-theme="dark"></div>
+                                <div class="theme-option theme-blue" data-theme="blue"></div>
+                                <div class="theme-option theme-green" data-theme="green"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Veri Yönetimi -->
+                        <div class="settings-section">
+                            <h3 class="section-title">Veri Yönetimi</h3>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Veri Yedekleme</label>
+                                <div>
+                                    <button type="button" class="btn btn-secondary">
+                                        <i class="fas fa-download"></i> Yedek İndir
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Verileri Sil</label>
+                                <div>
+                                    <button type="button" class="btn btn-secondary" id="clearDataBtn">
+                                        <i class="fas fa-trash"></i> Önbelleği Temizle
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Form Actions -->
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">Ayarları Kaydet</button>
+                            <button type="button" class="btn btn-secondary" id="resetSettingsBtn">Varsayılanlara Sıfırla</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle user dropdown
+        document.getElementById('user-menu-btn').addEventListener('click', function(e) {
+            e.stopPropagation();
+            document.querySelector('.user-dropdown').classList.toggle('active');
+            document.querySelector('.notification-dropdown').classList.remove('active');
+        });
+        
+        // Toggle notification dropdown
+        document.getElementById('notification-btn').addEventListener('click', function(e) {
+            e.stopPropagation();
+            document.querySelector('.notification-dropdown').classList.toggle('active');
+            document.querySelector('.user-dropdown').classList.remove('active');
+        });
+        
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.dropdown') && !e.target.closest('.user-profile') && !e.target.closest('.notification')) {
+                document.querySelector('.user-dropdown').classList.remove('active');
+                document.querySelector('.notification-dropdown').classList.remove('active');
+            }
+        });
+        
+        // Logout functionality
+        document.getElementById('logout-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            if (confirm('Çıkış yapmak istediğinize emin misiniz?')) {
+                alert('Çıkış yapılıyor...');
+                window.location.href = 'login.html';
+            }
+        });
+        
+        document.getElementById('logout-dropdown-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            if (confirm('Çıkış yapmak istediğinize emin misiniz?')) {
+                alert('Çıkış yapılıyor...');
+                window.location.href = 'login.html';
+            }
+        });
+        
+        // Mobile menu toggle
+        const sidebar = document.querySelector('.sidebar');
+        const menuItems = document.querySelectorAll('.menu-item');
+        
+        function toggleSidebar() {
+            if (window.innerWidth < 576) {
+                sidebar.style.width = sidebar.style.width === '250px' ? '0' : '250px';
+            }
+        }
+        
+        menuItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                if (window.innerWidth < 576) {
+                    toggleSidebar();
+                }
+            });
+        });
+        
+        document.addEventListener('click', function(e) {
+            if (window.innerWidth < 576 && 
+                !sidebar.contains(e.target) && 
+                !e.target.classList.contains('menu-icon')) {
+                sidebar.style.width = '0';
+            }
+        });
+        
+        // Theme selection
+        const themeOptions = document.querySelectorAll('.theme-option');
+        
+        themeOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                themeOptions.forEach(opt => opt.classList.remove('active'));
+                this.classList.add('active');
+                
+                const theme = this.getAttribute('data-theme');
+                alert(`Tema "${theme}" olarak ayarlandı!`);
+            });
+        });
+        
+        // Clear data button
+        document.getElementById('clearDataBtn').addEventListener('click', function() {
+            if (confirm('Önbellek verilerini temizlemek istediğinize emin misiniz?')) {
+                alert('Önbellek başarıyla temizlendi.');
+            }
+        });
+        
+        // Reset settings button
+        document.getElementById('resetSettingsBtn').addEventListener('click', function() {
+            if (confirm('Tüm ayarları varsayılan değerlere sıfırlamak istediğinize emin misiniz?')) {
+                alert('Ayarlar varsayılan değerlere sıfırlandı.');
+                
+                // Reset checkboxes
+                document.getElementById('email-notifications').checked = true;
+                document.getElementById('sms-notifications').checked = false;
+                document.getElementById('order-notifications').checked = true;
+                document.getElementById('stock-notifications').checked = true;
+                document.getElementById('review-notifications').checked = true;
+                document.getElementById('promo-notifications').checked = false;
+                
+                // Reset theme
+                themeOptions.forEach(opt => opt.classList.remove('active'));
+                document.querySelector('.theme-light').classList.add('active');
+            }
+        });
+        
+        // Form submission
+        document.getElementById('settingsForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Ayarlarınız başarıyla kaydedildi.');
+        });
+    </script>
+</body>
+</html>

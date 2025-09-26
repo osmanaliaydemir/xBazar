@@ -50,13 +50,23 @@ public class AuthService : IAuthService
         var claims = CreateClaims(user, roles);
         var accessToken = _jwtService.GenerateAccessToken(claims);
         var refreshToken = _jwtService.GenerateRefreshToken();
+        var jwtId = _jwtService.GetJwtId(accessToken);
 
-        // Store refresh token hash and reverse lookup in cache (rotation-ready)
-        var cacheKey = $"refresh_token:{user.Id}";
+        // Revoke all existing refresh tokens for this user
+        await _unitOfWork.RefreshTokens.RevokeAllUserTokensAsync(user.Id, "New login");
+
+        // Store refresh token in database
         var tokenExpiry = request.RememberMe ? TimeSpan.FromDays(30) : TimeSpan.FromDays(7);
-        var refreshHash = HashToken(refreshToken);
-        await _cacheService.SetAsync(cacheKey, refreshHash, tokenExpiry);
-        await _cacheService.SetAsync($"refresh_lookup:{refreshHash}", user.Id.ToString(), tokenExpiry);
+        var refreshTokenEntity = new RefreshToken
+        {
+            UserId = user.Id,
+            TokenHash = HashToken(refreshToken),
+            JwtId = jwtId ?? Guid.NewGuid().ToString(),
+            ExpiresAt = DateTime.UtcNow.Add(tokenExpiry),
+            CreatedAt = DateTime.UtcNow
+        };
+
+        await _unitOfWork.RefreshTokens.AddAsync(refreshTokenEntity);
 
         // Update user's last login
         user.UpdatedAt = DateTime.UtcNow;
@@ -133,12 +143,20 @@ public class AuthService : IAuthService
         var claims = CreateClaims(user, roles);
         var accessToken = _jwtService.GenerateAccessToken(claims);
         var refreshToken = _jwtService.GenerateRefreshToken();
+        var jwtId = _jwtService.GetJwtId(accessToken);
 
-        // Store refresh token hash and reverse lookup in cache
-        var cacheKey = $"refresh_token:{user.Id}";
-        var refreshHash = HashToken(refreshToken);
-        await _cacheService.SetAsync(cacheKey, refreshHash, TimeSpan.FromDays(7));
-        await _cacheService.SetAsync($"refresh_lookup:{refreshHash}", user.Id.ToString(), TimeSpan.FromDays(7));
+        // Store refresh token in database
+        var refreshTokenEntity = new RefreshToken
+        {
+            UserId = user.Id,
+            TokenHash = HashToken(refreshToken),
+            JwtId = jwtId ?? Guid.NewGuid().ToString(),
+            ExpiresAt = DateTime.UtcNow.AddDays(7),
+            CreatedAt = DateTime.UtcNow
+        };
+
+        await _unitOfWork.RefreshTokens.AddAsync(refreshTokenEntity);
+        await _unitOfWork.SaveChangesAsync();
 
         return new AuthResponse
         {
@@ -174,23 +192,36 @@ public class AuthService : IAuthService
             throw new UnauthorizedAccessException("Invalid token claims");
         }
 
-        // Verify refresh token
-        var cacheKey = $"refresh_token:{userId}";
-        var storedRefreshHash = await _cacheService.GetAsync<string>(cacheKey);
-        var requestHash = HashToken(request.RefreshToken);
-
-        // Detect reuse: if provided token was already used, revoke family
-        var reused = await _cacheService.GetAsync<string>($"used_refresh:{requestHash}");
-        if (!string.IsNullOrEmpty(reused))
+        // Get JWT ID from access token
+        var jwtId = _jwtService.GetJwtId(request.AccessToken);
+        if (string.IsNullOrEmpty(jwtId))
         {
-            // Revoke the whole family
-            await _cacheService.RemoveAsync(cacheKey);
-            throw new UnauthorizedAccessException("Refresh token reuse detected");
+            throw new UnauthorizedAccessException("Invalid access token");
         }
 
-        if (storedRefreshHash != requestHash)
+        // Verify refresh token in database
+        var requestHash = HashToken(request.RefreshToken);
+        var refreshTokenEntity = await _unitOfWork.RefreshTokens.GetByTokenHashAsync(requestHash);
+
+        if (refreshTokenEntity == null || !refreshTokenEntity.IsActive)
         {
             throw new UnauthorizedAccessException("Invalid refresh token");
+        }
+
+        // Check if token belongs to the user
+        if (refreshTokenEntity.UserId != userId)
+        {
+            throw new UnauthorizedAccessException("Invalid refresh token");
+        }
+
+        // Check if token is expired
+        if (refreshTokenEntity.IsExpired)
+        {
+            refreshTokenEntity.IsRevoked = true;
+            refreshTokenEntity.RevokedAt = DateTime.UtcNow;
+            refreshTokenEntity.ReasonRevoked = "Token expired";
+            await _unitOfWork.SaveChangesAsync();
+            throw new UnauthorizedAccessException("Refresh token expired");
         }
 
         // Get user
@@ -207,16 +238,24 @@ public class AuthService : IAuthService
         var claims = CreateClaims(user, roles);
         var newAccessToken = _jwtService.GenerateAccessToken(claims);
         var newRefreshToken = _jwtService.GenerateRefreshToken();
+        var newJwtId = _jwtService.GetJwtId(newAccessToken);
 
-        // Mark old token as used to prevent reuse
-        await _cacheService.SetAsync($"used_refresh:{requestHash}", "1", TimeSpan.FromDays(7));
-        // Remove reverse lookup of old token
-        await _cacheService.RemoveAsync($"refresh_lookup:{requestHash}");
+        // Mark old refresh token as used
+        refreshTokenEntity.UsedAt = DateTime.UtcNow;
+        refreshTokenEntity.ReplacedByTokenHash = HashToken(newRefreshToken);
 
-        // Store new hash and reverse lookup
-        var newHash = HashToken(newRefreshToken);
-        await _cacheService.SetAsync(cacheKey, newHash, TimeSpan.FromDays(7));
-        await _cacheService.SetAsync($"refresh_lookup:{newHash}", user.Id.ToString(), TimeSpan.FromDays(7));
+        // Create new refresh token
+        var newRefreshTokenEntity = new RefreshToken
+        {
+            UserId = user.Id,
+            TokenHash = HashToken(newRefreshToken),
+            JwtId = newJwtId ?? Guid.NewGuid().ToString(),
+            ExpiresAt = DateTime.UtcNow.AddDays(7),
+            CreatedAt = DateTime.UtcNow
+        };
+
+        await _unitOfWork.RefreshTokens.AddAsync(newRefreshTokenEntity);
+        await _unitOfWork.SaveChangesAsync();
 
         return new AuthResponse
         {
@@ -239,25 +278,21 @@ public class AuthService : IAuthService
 
     public async Task<bool> LogoutAsync(string refreshToken)
     {
-        // Find user by refresh token (reverse lookup)
+        // Find refresh token in database
         var hash = HashToken(refreshToken);
-        var userIdString = await _cacheService.GetAsync<string>($"refresh_lookup:{hash}");
-        Guid? userId = null;
-        if (Guid.TryParse(userIdString, out var parsed))
-        {
-            userId = parsed;
-        }
-        if (userId == null)
+        var refreshTokenEntity = await _unitOfWork.RefreshTokens.GetByTokenHashAsync(hash);
+        
+        if (refreshTokenEntity == null || !refreshTokenEntity.IsActive)
         {
             return false;
         }
 
-        // Remove refresh token from cache and reverse lookup; mark token as used
-        var cacheKey = $"refresh_token:{userId}";
-        await _cacheService.RemoveAsync(cacheKey);
-        await _cacheService.RemoveAsync($"refresh_lookup:{hash}");
-        await _cacheService.SetAsync($"used_refresh:{hash}", "1", TimeSpan.FromDays(7));
+        // Revoke the specific token
+        refreshTokenEntity.IsRevoked = true;
+        refreshTokenEntity.RevokedAt = DateTime.UtcNow;
+        refreshTokenEntity.ReasonRevoked = "User logout";
 
+        await _unitOfWork.SaveChangesAsync();
         return true;
     }
 

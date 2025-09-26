@@ -1,10 +1,25 @@
 # TODO (xBazar)
 
+## ✅ **Son Güncellemeler (Aralık 2024)**
+
+### **JWT Refresh Token Mimarisi Tamamlandı**
+- ✅ Veritabanı tabanlı refresh token yönetimi (RefreshToken entity)
+- ✅ JWT ID (jti) claim desteği ve token tracking
+- ✅ CSRF Protection Middleware eklendi
+- ✅ Token rotation ve reuse detection iyileştirildi
+- ✅ HttpOnly cookie desteği
+- ✅ Token family revocation (tekrar kullanımda tüm aile iptal)
+
+### **Karar: SQL Server'da Kalınacak**
+- ❌ PostgreSQL geçişi iptal edildi
+- ✅ Mevcut SQL Server altyapısı korunacak
+- ✅ Database First yaklaşımı devam edecek
+
 ## Mimari Sapmalar ve Altyapı Eksikleri
-- [ ] Veritabanı motorunu Postgres'e geçir (plan: PostgreSQL; mevcut: SQL Server)
-  - [ ] `ApplicationDbContext` sağlayıcısını Npgsql'e çevir
-  - [ ] Connection string ve provider bağımlılıklarını güncelle (`Npgsql.EntityFrameworkCore.PostgreSQL`)
-  - [ ] Migration'ları yeniden oluştur ve veri taşıma stratejisini yaz
+- [x] Veritabanı motorunu Postgres'e geçir (plan: PostgreSQL; mevcut: SQL Server) - **İPTAL EDİLDİ: SQL Server'da kalınacak**
+  - [x] `ApplicationDbContext` sağlayıcısını Npgsql'e çevir - **İPTAL EDİLDİ**
+  - [x] Connection string ve provider bağımlılıklarını güncelle (`Npgsql.EntityFrameworkCore.PostgreSQL`) - **İPTAL EDİLDİ**
+  - [x] Migration'ları yeniden oluştur ve veri taşıma stratejisini yaz - **İPTAL EDİLDİ**
 - [ ] Redis yapılandırmasını ortama göre parametrize et (SSL/Password, sentinel/cluster desteği)
 - [ ] Mesaj kuyruğu (RabbitMQ) ekle (şu an yok)
   - [ ] Bağlantı, publisher, consumer altyapısı ve örnek iş (email, audit offload)
@@ -14,10 +29,14 @@
   - [ ] Trace, metrics, log enrichment; Prometheus endpoint
 
 ## Güvenlik ve Kimlik Doğrulama
-- [ ] Refresh token mimarisini tamamla ve belgeyle
-  - [ ] `Jwt` ayarlarında access/refresh sürelerini tutarlı adlarla kullan (code vs config mismatch)
-  - [ ] Token aile rotasyonu, reuse detection (kısmen var) için kalıcı blacklisting ve TTL
-  - [ ] Refresh token'ı HttpOnly cookie olarak ver ve yenileme endpointinde CSRF koruması ekle
+- [x] Refresh token mimarisini tamamla ve belgeyle
+  - [x] `Jwt` ayarlarında access/refresh sürelerini tutarlı adlarla kullan (code vs config mismatch)
+  - [x] Token aile rotasyonu, reuse detection (kısmen var) için kalıcı blacklisting ve TTL
+  - [x] Refresh token'ı HttpOnly cookie olarak ver ve yenileme endpointinde CSRF koruması ekle
+  - [x] **YENİ**: Veritabanı tabanlı refresh token yönetimi (RefreshToken entity)
+  - [x] **YENİ**: JWT ID (jti) claim desteği ve token tracking
+  - [x] **YENİ**: CSRF Protection Middleware eklendi
+  - [x] **YENİ**: Token rotation ve reuse detection iyileştirildi
 - [x] RBAC/Policy-based authorization kuralları (policy'ler tanımlanmamış)
   - [x] `Permissions` sabitlerine karşı policy registration
   - [x] Controller/action bazlı `[Authorize(Policy="...")]` uygulaması
@@ -80,11 +99,11 @@
 ---
 
 ## Hızlı Aksiyon Listesi (Önceliklendirilmiş)
-1) Postgres’e geçiş ve migration’lar
-2) Gerçek Iyzico entegrasyonu + webhook
-3) Policy-based RBAC ve permission enforcement
-4) Dağıtık rate limiting + data protection key ring
-5) MinIO dosya saklama + presigned upload
-6) OpenTelemetry + Prometheus
+1) ~~Postgres'e geçiş ve migration'lar~~ **İPTAL EDİLDİ: SQL Server'da kalınacak**
+2) **Gerçek Iyzico entegrasyonu + webhook** ⭐ **ÖNCELİK**
+3) ~~Policy-based RBAC ve permission enforcement~~ **TAMAMLANDI**
+4) **Dağıtık rate limiting + data protection key ring** ⭐ **YÜKSEK ÖNCELİK**
+5) **MinIO dosya saklama + presigned upload** ⭐ **YÜKSEK ÖNCELİK**
+6) **OpenTelemetry + Prometheus** ⭐ **ORTA ÖNCELİK**
 7) Sepet fiyat/kupon/vergilendirme gerçek servislere bağlama
 8) CI/CD pipeline ve prod konfigürasyonları

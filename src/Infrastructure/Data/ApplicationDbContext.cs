@@ -73,6 +73,8 @@ public partial class ApplicationDbContext : DbContext
 
     public virtual DbSet<SecurityEvent> SecurityEvents { get; set; }
 
+    public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
