@@ -9,9 +9,10 @@
     {
       "name": "Auth",
       "item": [
-        { "name": "Login", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "url": "{{baseUrl}}/api/auth/login", "body": { "mode": "raw", "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"P@ssw0rd!\"\n}" } } },
-        { "name": "Refresh", "request": { "method": "POST", "url": "{{baseUrl}}/api/auth/refresh" } },
-        { "name": "Logout", "request": { "method": "POST", "url": "{{baseUrl}}/api/auth/logout" } }
+        { "name": "Register", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "url": "{{baseUrl}}/api/auth/register", "body": { "mode": "raw", "raw": "{\n  \"email\": \"musteri@example.com\",\n  \"userName\": \"musteri123\",\n  \"firstName\": \"Müşteri\",\n  \"lastName\": \"Kullanıcı\",\n  \"password\": \"Musteri123!\"\n}" } } },
+        { "name": "Login", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "url": "{{baseUrl}}/api/auth/login", "body": { "mode": "raw", "raw": "{\n  \"email\": \"musteri@example.com\",\n  \"password\": \"Musteri123!\"\n}" } } },
+        { "name": "Refresh Token", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "url": "{{baseUrl}}/api/auth/refresh-token", "body": { "mode": "raw", "raw": "{\n  \"accessToken\": \"{{accessToken}}\",\n  \"refreshToken\": \"{{refreshToken}}\"\n}" } } },
+        { "name": "Logout", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "url": "{{baseUrl}}/api/auth/logout", "body": { "mode": "raw", "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}" } } }
       ]
     },
     {
@@ -116,6 +117,8 @@
   "variable": [
     { "key": "baseUrl", "value": "https://localhost:7001" },
     { "key": "token", "value": "" },
+    { "key": "accessToken", "value": "" },
+    { "key": "refreshToken", "value": "" },
     { "key": "storeId", "value": "" },
     { "key": "productId", "value": "" },
     { "key": "orderId", "value": "" },

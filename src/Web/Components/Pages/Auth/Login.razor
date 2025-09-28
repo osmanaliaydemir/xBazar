@@ -1,5 +1,6 @@
 ﻿@page "/login"
 @layout AuthLayout
+@inject IConfiguration Configuration
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -18,27 +19,25 @@
             <p>Hesabınıza erişmek için giriş yapın</p>
         </div>
 
-        <div class="alert alert-error" id="errorAlert">
+        <div class="alert alert-error" id="errorAlert" style="display:none">
             <i class="fas fa-exclamation-circle"></i>
             <span id="errorMessage">E-posta veya şifre hatalı</span>
         </div>
 
-        <div class="alert alert-success" id="successAlert">
+        <div class="alert alert-success" id="successAlert" style="display:none">
             <i class="fas fa-check-circle"></i>
             <span>Giriş başarılı, yönlendiriliyorsunuz...</span>
         </div>
 
-        <form id="loginForm">
+        <form id="loginForm" autocomplete="on" novalidate>
             <div class="form-group">
-                @* <label class="form-label">E-posta Adresi</label> *@
-                <input type="email" class="form-input" id="email" placeholder="E-posta adresiniz" required>
+                <input type="email" class="form-input" id="email" placeholder="E-posta adresiniz" required autocomplete="username" />
             </div>
 
             <div class="form-group">
-                @* <label class="form-label">Şifre</label> *@
                 <div class="password-toggle">
-                    <input type="password" class="form-input" id="password" placeholder="Şifreniz" required>
-                    <button type="button" class="toggle-password" id="togglePassword">
+                    <input type="password" class="form-input" id="password" placeholder="Şifreniz" required autocomplete="current-password" />
+                    <button type="button" class="toggle-password" id="togglePassword" aria-label="Şifreyi göster/gizle">
                         <i class="fas fa-eye"></i>
                     </button>
                 </div>
@@ -46,29 +45,31 @@
 
             <div class="remember-forgot">
                 <div class="remember-me">
-                    <input type="checkbox" id="rememberMe">
+                    <input type="checkbox" id="rememberMe" />
                     <label for="rememberMe">Beni hatırla</label>
                 </div>
-                <a href="forgot-password.html" class="forgot-password">Şifremi unuttum</a>
+                <a href="/forgot-password" class="forgot-password">Şifremi unuttum</a>
             </div>
 
-            <button type="submit" class="btn btn-primary">Giriş Yap</button>
+            <!-- DİKKAT: type="button" -->
+            <button type="button" id="btnLogin" class="btn btn-primary">Giriş Yap</button>
         </form>
 
         <div class="login-divider">
             <span>veya</span>
         </div>
 
-        <button class="btn btn-google">
+        <button type="button" class="btn btn-google">
             <i class="fab fa-google"></i>
             Google ile giriş yap
         </button>
 
         <div class="login-footer">
-            <p>Hesabınız yok mu? <a href="register">Hemen kaydolun</a></p>
+            <p>Hesabınız yok mu? <a href="/register">Hemen kaydolun</a></p>
             <p><a href="/" title="Ana sayfa">← Ana sayfaya dön</a></p>
         </div>
     </div>
 </div>
 
-<link rel="stylesheet" href="@Assets["assets/modules/login/login.js"]" />
+<script src="/js/login-config.js"></script>
+<script defer src="/assets/modules/login/login.js"></script>

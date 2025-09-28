@@ -11,11 +11,13 @@ public class AuthController : BaseController
 {
     private readonly IAuthService _authService;
     private readonly IUserService _userService;
+    private readonly ILogger<AuthController> _logger;
 
-    public AuthController(IAuthService authService, IUserService userService)
+    public AuthController(IAuthService authService, IUserService userService, ILogger<AuthController> logger)
     {
         _authService = authService;
         _userService = userService;
+        _logger = logger;
     }
 
     [HttpPost("register")]
@@ -34,8 +36,9 @@ public class AuthController : BaseController
         {
             return HandleResult(ApiResponse.Error("Invalid operation", new List<string> { ex.Message }));
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex, "An error occurred during login for user: {Email}", request.Email);
             return HandleResult(ApiResponse.Error("An error occurred during registration"));
         }
     }
@@ -46,24 +49,41 @@ public class AuthController : BaseController
         try
         {
             var result = await _authService.LoginAsync(request);
-            Response.Cookies.Append(
-                "refresh_token",
-                result.RefreshToken,
-                new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict,
-                    Expires = result.ExpiresAt.AddDays(7)
-                });
-            return Ok(new { accessToken = result.AccessToken, expiresAt = result.ExpiresAt, user = result.User });
+            
+            // Check if request is from mobile app (User-Agent or custom header)
+            var isMobileApp = Request.Headers.ContainsKey("X-Mobile-App") || 
+                             Request.Headers.UserAgent.ToString().Contains("ReactNative");
+            
+            if (!isMobileApp)
+            {
+                // Web app: Use HttpOnly cookies
+                Response.Cookies.Append(
+                    "refresh_token",
+                    result.RefreshToken,
+                    new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Secure = true,
+                        SameSite = SameSiteMode.Strict,
+                        Expires = result.ExpiresAt.AddDays(7)
+                    });
+            }
+            
+            // Return response for both web and mobile
+            return Ok(new { 
+                accessToken = result.AccessToken, 
+                refreshToken = isMobileApp ? result.RefreshToken : null, // Include refresh token for mobile
+                expiresAt = result.ExpiresAt, 
+                user = result.User 
+            });
         }
         catch (UnauthorizedAccessException ex)
         {
             return HandleResult(ApiResponse.Unauthorized<object>(ex.Message));
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex, "An error occurred during login for user: {Email}", request.Email);
             return HandleResult(ApiResponse.Error("An error occurred during login"));
         }
     }
@@ -73,21 +93,36 @@ public class AuthController : BaseController
     {
         try
         {
-            // Prefer cookie over body
-            var refreshToken = Request.Cookies["refresh_token"] ?? request.RefreshToken;
+            // Check if request is from mobile app
+            var isMobileApp = Request.Headers.ContainsKey("X-Mobile-App") || 
+                             Request.Headers.UserAgent.ToString().Contains("ReactNative");
+            
+            // Prefer cookie for web, body for mobile
+            var refreshToken = isMobileApp ? request.RefreshToken : (Request.Cookies["refresh_token"] ?? request.RefreshToken);
             var req = new RefreshTokenRequest { AccessToken = request.AccessToken, RefreshToken = refreshToken };
             var result = await _authService.RefreshTokenAsync(req);
-            Response.Cookies.Append(
-                "refresh_token",
-                result.RefreshToken,
-                new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict,
-                    Expires = result.ExpiresAt.AddDays(7)
-                });
-            return Ok(new { accessToken = result.AccessToken, expiresAt = result.ExpiresAt, user = result.User });
+            
+            if (!isMobileApp)
+            {
+                // Web app: Update HttpOnly cookie
+                Response.Cookies.Append(
+                    "refresh_token",
+                    result.RefreshToken,
+                    new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Secure = true,
+                        SameSite = SameSiteMode.Strict,
+                        Expires = result.ExpiresAt.AddDays(7)
+                    });
+            }
+            
+            return Ok(new { 
+                accessToken = result.AccessToken, 
+                refreshToken = isMobileApp ? result.RefreshToken : null, // Include refresh token for mobile
+                expiresAt = result.ExpiresAt, 
+                user = result.User 
+            });
         }
         catch (UnauthorizedAccessException ex)
         {
@@ -104,9 +139,20 @@ public class AuthController : BaseController
     {
         try
         {
-            var refreshToken = Request.Cookies["refresh_token"] ?? request.RefreshToken;
+            // Check if request is from mobile app
+            var isMobileApp = Request.Headers.ContainsKey("X-Mobile-App") || 
+                             Request.Headers.UserAgent.ToString().Contains("ReactNative");
+            
+            // Get refresh token based on platform
+            var refreshToken = isMobileApp ? request.RefreshToken : (Request.Cookies["refresh_token"] ?? request.RefreshToken);
             var result = await _authService.LogoutAsync(refreshToken);
-            Response.Cookies.Delete("refresh_token", new CookieOptions { HttpOnly = true, Secure = true, SameSite = SameSiteMode.Strict });
+            
+            if (!isMobileApp)
+            {
+                // Web app: Delete HttpOnly cookie
+                Response.Cookies.Delete("refresh_token", new CookieOptions { HttpOnly = true, Secure = true, SameSite = SameSiteMode.Strict });
+            }
+            
             return Ok(new { success = result });
         }
         catch (Exception)
